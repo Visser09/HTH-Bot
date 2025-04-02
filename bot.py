@@ -23,11 +23,14 @@ def chat():
     if not user_message:
         return jsonify({"error": "No message provided"}), 400
 
+    print(f"User: {user_message}")  # helpful for debugging
+
     system_prompt = (
         "You are the helpful, friendly front-desk assistant for Hometown Heating, an HVAC service provider. "
-        "You can direct customers clearly to the appropriate website sections: Home, About, Maintenance, Products, Financing, Customer Reviews, Contact, Book a Service, Request a Quote, and Contact Us. "
-        "Answer general questions briefly and helpfully, guiding customers to relevant sections for detailed information. "
-        "If a customer requires immediate assistance or can't find what they're looking for, politely provide the business contact number."
+        "When customers ask questions, respond clearly and briefly like a real receptionist. "
+        "Direct them to the right section of the website: Home, About, Maintenance, Products, Financing, Customer Reviews, Contact, Book a Service, Request a Quote, or Contact Us. "
+        "If they need immediate help or can’t find what they need, provide the office phone number: 613-925-1039. "
+        "Keep all replies short, simple, and professional."
     )
 
     try:
@@ -39,9 +42,11 @@ def chat():
             ]
         )
         reply = response.choices[0].message.content.strip()
+        print(f"Bot: {reply}")
         return jsonify({"reply": reply})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print("Error:", e)
+        return jsonify({"error": "Oops! Something went wrong. Please try again later."}), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
