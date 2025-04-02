@@ -1,0 +1,135 @@
+<!-- Professional Chatbot Widget -->
+<style>
+    /* Container styles */
+    #chatbot-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 350px;
+      font-family: "Segoe UI", sans-serif;
+      z-index: 9999;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.15);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    /* Header styles */
+    #chatbot-header {
+      background-color: #0066CC;
+      color: #fff;
+      padding: 15px;
+      cursor: pointer;
+      text-align: center;
+      font-size: 16px;
+    }
+    /* Body styles */
+    #chatbot-body {
+      display: none;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      padding: 15px;
+    }
+    #chatbot-messages {
+      height: 250px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #333;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+    #chatbot-input {
+      width: calc(100% - 80px);
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    #chatbot-send {
+      padding: 10px 15px;
+      margin-left: 5px;
+      background-color: #0066CC;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    #chatbot-send:hover {
+      background-color: #005bb5;
+    }
+    /* Message styles */
+    #chatbot-messages .user {
+      text-align: right;
+      margin-bottom: 10px;
+      color: #007700;
+    }
+    #chatbot-messages .bot {
+      text-align: left;
+      margin-bottom: 10px;
+      color: #333;
+    }
+  </style>
+  
+  <div id="chatbot-container">
+    <div id="chatbot-header">Need Help? Chat with us!</div>
+    <div id="chatbot-body">
+      <div id="chatbot-messages"></div>
+      <input type="text" id="chatbot-input" placeholder="Type your message...">
+      <button id="chatbot-send">Send</button>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var header = document.getElementById('chatbot-header');
+      var body = document.getElementById('chatbot-body');
+  
+      header.onclick = function() {
+        var currentDisplay = window.getComputedStyle(body).display;
+        body.style.display = currentDisplay === 'none' ? 'block' : 'none';
+      };
+  
+      // The rest of your code (message sending, etc.) goes here...
+      function displayMessage(sender, text) {
+        var msgContainer = document.getElementById('chatbot-messages');
+        var msgDiv = document.createElement('div');
+        msgDiv.className = sender;
+        msgDiv.textContent = sender === "user" ? "You: " + text : "Bot: " + text;
+        msgContainer.appendChild(msgDiv);
+        msgContainer.scrollTop = msgContainer.scrollHeight;
+      }
+  
+      document.getElementById('chatbot-send').onclick = function() {
+        var input = document.getElementById('chatbot-input');
+        var message = input.value.trim();
+        if (message === "") return;
+        displayMessage("user", message);
+        input.value = "";
+        
+        fetch("http://127.0.0.1:5000/chat", {  // Use your local backend URL for testing
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: message })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.reply) {
+            displayMessage("bot", data.reply);
+          } else {
+            displayMessage("bot", "Error: " + (data.error || "Unknown error."));
+          }
+        })
+        .catch(error => {
+          displayMessage("bot", "Error: " + error.message);
+        });
+      };
+  
+      // Allow "Enter" key to send message
+      document.getElementById('chatbot-input').addEventListener("keyup", function(event) {
+        if (event.key === "Enter") {
+          document.getElementById("chatbot-send").click();
+        }
+      });
+    });
+  </script>
+  
