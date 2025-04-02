@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import openai
 import os
@@ -7,6 +7,10 @@ app = Flask(__name__)
 CORS(app)
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
+
+@app.route("/ping", methods=["GET"])
+def ping():
+    return jsonify({"status": "ok"})
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -30,13 +34,11 @@ def chat():
                 {"role": "user", "content": user_message}
             ]
         )
-        bot_reply = response['choices'][0]['message']['content'].strip()
-        return jsonify({'reply': bot_reply})
+        reply = response['choices'][0]['message']['content']
+        return jsonify({"reply": reply})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-
